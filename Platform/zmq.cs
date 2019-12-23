@@ -29,9 +29,11 @@
 		static zmq()
 		{
 
-#if !NETSTANDARD && !NETCORE
-			// (0) Initialize Library handle
-			NativeLib = Platform.LoadUnmanagedLibrary(LibraryName);
+            Console.WriteLine("zmq initializing");
+
+            #if !NETSTANDARD && !NETCORE
+            // (0) Initialize Library handle
+            NativeLib = Platform.LoadUnmanagedLibrary(LibraryName);
 
 			// (1) Initialize Platform information 
 			Platform.SetupImplementation(typeof(zmq));

@@ -22,6 +22,8 @@
 
 			// public const string LibraryFileExtension = ".so";
 
+            
+
 			public static readonly string[] LibraryPaths = new string[] {
                 "/lib/{LibraryName}*.so",
                 "/lib/{LibraryName}*.so.*",
@@ -71,9 +73,11 @@
 
 			private static void MonoDllMapInsert(string libraryName, string libraryPath)
 			{
+                Console.WriteLine("In MonoDllMapInsert(\"{0}\", \"{1}\")",
+                    libraryName, libraryPath);
 				IntPtr libraryNamePtr = Marshal.StringToHGlobalAnsi(libraryName);
 				IntPtr pathPtr = Marshal.StringToHGlobalAnsi(libraryPath);
-				mono_dllmap_insert(IntPtr.Zero, libraryNamePtr, IntPtr.Zero, pathPtr, IntPtr.Zero);
+                mono_dllmap_insert(IntPtr.Zero, libraryNamePtr, IntPtr.Zero, pathPtr, IntPtr.Zero);
 				Marshal.FreeHGlobal(libraryNamePtr);
 				Marshal.FreeHGlobal(pathPtr);
 			}
@@ -119,7 +123,7 @@
 					architecture = Enum.GetName(typeof(ImageFileMachine), Platform.Architecture).ToLower();
 				}
 				if (architecture == "i386") architecturePaths = new string[] { "i386", "x86" };
-				if (architecture == "amd64") architecturePaths = new string[] { "amd64", "x64" };
+				if (architecture == "amd64") architecturePaths = new string[] { "amd64", "x64", "x86_64" };
 				if (architecturePaths == null) architecturePaths = new string[] { architecture };
 				Platform.ExpandPaths(libraryPaths, "{Arch}", architecturePaths);
 
@@ -127,8 +131,24 @@
 
 				string traceLabel = string.Format("UnmanagedLibrary[{0}]", libraryName);
 
+                Console.WriteLine("IsUnity: {0}", Platform.IsUnity);
+                Console.WriteLine("IsUnityEditor: {0}", Platform.IsUnityEditor);
+
+                if (Platform.IsUnity && !Platform.IsUnityEditor)
+                {
+                    libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so");
+                    libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so.*");
+
+                    libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so");
+                    libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so.*");
+
+                    //Platform.IsMono = false;
+                }
+
 				foreach (string libraryPath in libraryPaths)
 				{
+                    Console.WriteLine("Trying libraryPath: {0}", libraryPath);
+
 			        string folder = null;
 			        string filesPattern = libraryPath;
 			        int filesPatternI;
@@ -147,18 +167,44 @@
 						// Finally, I am really loading this file
 						SafeLibraryHandle handle = OpenHandle(file);
 
+                        Console.WriteLine("Trying file {0}", file);
+
 						if (!handle.IsNullOrInvalid())
 						{
-							if (Platform.IsMono) {
-								// This is Platform.Posix. In mono, just dlopen'ing the library doesn't work.
-								// Using DllImport("__Internal", EntryPoint = "mono_dllmap_insert") to get mono on the path.
-								MonoDllMapInsert(libraryName, file);
-							}
+                            Console.WriteLine("Handle is not null or invalid :)");
+                            try
+                            {
 
-							Trace.TraceInformation(string.Format("{0} Loaded binary \"{1}\"", 
-								traceLabel, file));
+                                if (Platform.IsMono && !Platform.IsUnity)
+                                {
+                                    // This is Platform.Posix. In mono, just dlopen'ing the library doesn't work.
+                                    // Using DllImport("__Internal", EntryPoint = "mono_dllmap_insert") to get mono on the path.
+                                    MonoDllMapInsert(libraryName, file);
+                                }
 
-							return new UnmanagedLibrary(libraryName, handle);
+                                Trace.TraceInformation(string.Format("{0} Loaded binary \"{1}\"",
+                                    traceLabel, file));
+
+                                return new UnmanagedLibrary(libraryName, handle);
+                            }
+                            catch(System.IO.FileNotFoundException fnfe)
+                            {
+                                Console.Error.WriteLine("File Not Found Exception while trying to load {0}: {1}",
+                                    file,
+                                    fnfe.Message);
+                            }
+                            catch (System.EntryPointNotFoundException epnf)
+                            {
+                                Console.Error.WriteLine("Entry Point Not Found Exception while trying to load {0}: {1}",
+                                    file,
+                                    epnf.Message);
+                            }
+                            catch (System.TypeInitializationException tie)
+                            {
+                                Console.Error.WriteLine("Type Initialization Exception while trying to load {0}: {1}", 
+                                    file,
+                                    tie.Message);
+                            }
 						}
 
                         handle.Close();
@@ -180,7 +226,11 @@
 
 					if (!handle.IsNullOrInvalid())
 					{
-						if (Platform.IsMono) MonoDllMapInsert(libraryName, tempPath);
+                        if (Platform.IsMono && !Platform.IsUnity)
+                        {
+                            Console.WriteLine("I guess we are here now.");
+                            MonoDllMapInsert(libraryName, tempPath);
+                        }
 
 						Trace.TraceInformation(string.Format("{0} Loaded binary from EmbeddedResource \"{1}\" from \"{2}\".", 
 							traceLabel, resourceName, tempPath));
