@@ -170,8 +170,7 @@ namespace ZeroMQ.lib
             IsUnity = assemblies.Any(a => a.GetName().Name.Equals("UnityEngine", StringComparison.InvariantCultureIgnoreCase));
             IsUnityEditor = assemblies.Any(a => a.GetName().Name.Equals("UnityEditor", StringComparison.InvariantCultureIgnoreCase));
 
-
-            if (IsMonoMac)
+			if (IsMonoMac)
 			{
 				Kind = PlatformKind.Posix;
 				Name = PlatformName.MacOSX;
@@ -220,7 +219,6 @@ namespace ZeroMQ.lib
 
 			foreach (string libraryPath in stream.ToArray())
 			{
-                Console.WriteLine("Program.cs libraryPath: {0}", libraryPath);
 				if (-1 == libraryPath.IndexOf(extension)) continue;
 
 				int libraryPathI = stream.IndexOf(libraryPath);

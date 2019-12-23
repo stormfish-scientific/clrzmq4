@@ -22,8 +22,6 @@
 
 			// public const string LibraryFileExtension = ".so";
 
-            
-
 			public static readonly string[] LibraryPaths = new string[] {
                 "/lib/{LibraryName}*.so",
                 "/lib/{LibraryName}*.so.*",
@@ -73,11 +71,9 @@
 
 			private static void MonoDllMapInsert(string libraryName, string libraryPath)
 			{
-                Console.WriteLine("In MonoDllMapInsert(\"{0}\", \"{1}\")",
-                    libraryName, libraryPath);
 				IntPtr libraryNamePtr = Marshal.StringToHGlobalAnsi(libraryName);
 				IntPtr pathPtr = Marshal.StringToHGlobalAnsi(libraryPath);
-                mono_dllmap_insert(IntPtr.Zero, libraryNamePtr, IntPtr.Zero, pathPtr, IntPtr.Zero);
+				mono_dllmap_insert(IntPtr.Zero, libraryNamePtr, IntPtr.Zero, pathPtr, IntPtr.Zero);
 				Marshal.FreeHGlobal(libraryNamePtr);
 				Marshal.FreeHGlobal(pathPtr);
 			}
@@ -131,9 +127,6 @@
 
 				string traceLabel = string.Format("UnmanagedLibrary[{0}]", libraryName);
 
-                Console.WriteLine("IsUnity: {0}", Platform.IsUnity);
-                Console.WriteLine("IsUnityEditor: {0}", Platform.IsUnityEditor);
-
                 if (Platform.IsUnity && !Platform.IsUnityEditor)
                 {
                     libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so");
@@ -141,14 +134,10 @@
 
                     libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so");
                     libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so.*");
-
-                    //Platform.IsMono = false;
                 }
 
 				foreach (string libraryPath in libraryPaths)
 				{
-                    Console.WriteLine("Trying libraryPath: {0}", libraryPath);
-
 			        string folder = null;
 			        string filesPattern = libraryPath;
 			        int filesPatternI;
@@ -167,14 +156,8 @@
 						// Finally, I am really loading this file
 						SafeLibraryHandle handle = OpenHandle(file);
 
-                        Console.WriteLine("Trying file {0}", file);
-
 						if (!handle.IsNullOrInvalid())
 						{
-                            Console.WriteLine("Handle is not null or invalid :)");
-                            try
-                            {
-
                                 if (Platform.IsMono && !Platform.IsUnity)
                                 {
                                     // This is Platform.Posix. In mono, just dlopen'ing the library doesn't work.
@@ -186,25 +169,6 @@
                                     traceLabel, file));
 
                                 return new UnmanagedLibrary(libraryName, handle);
-                            }
-                            catch(System.IO.FileNotFoundException fnfe)
-                            {
-                                Console.Error.WriteLine("File Not Found Exception while trying to load {0}: {1}",
-                                    file,
-                                    fnfe.Message);
-                            }
-                            catch (System.EntryPointNotFoundException epnf)
-                            {
-                                Console.Error.WriteLine("Entry Point Not Found Exception while trying to load {0}: {1}",
-                                    file,
-                                    epnf.Message);
-                            }
-                            catch (System.TypeInitializationException tie)
-                            {
-                                Console.Error.WriteLine("Type Initialization Exception while trying to load {0}: {1}", 
-                                    file,
-                                    tie.Message);
-                            }
 						}
 
                         handle.Close();
@@ -228,7 +192,6 @@
 					{
                         if (Platform.IsMono && !Platform.IsUnity)
                         {
-                            Console.WriteLine("I guess we are here now.");
                             MonoDllMapInsert(libraryName, tempPath);
                         }
 
