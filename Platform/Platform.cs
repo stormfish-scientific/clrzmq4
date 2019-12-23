@@ -167,8 +167,8 @@ namespace ZeroMQ.lib
 			IsMonoMac = assemblies.Any(a => a.GetName().Name.Equals("MonoMac", StringComparison.InvariantCultureIgnoreCase));
 			IsXamarinIOS = assemblies.Any(a => a.GetName().Name.Equals("Xamarin.iOS", StringComparison.InvariantCultureIgnoreCase));
 			IsXamarinAndroid = assemblies.Any(a => a.GetName().Name.Equals("Xamarin.Android", StringComparison.InvariantCultureIgnoreCase));
-            IsUnity = assemblies.Any(a => a.GetName().Name.Equals("UnityEngine", StringComparison.InvariantCultureIgnoreCase));
-            IsUnityEditor = assemblies.Any(a => a.GetName().Name.Equals("UnityEditor", StringComparison.InvariantCultureIgnoreCase));
+			IsUnity = assemblies.Any(a => a.GetName().Name.Equals("UnityEngine", StringComparison.InvariantCultureIgnoreCase));
+			IsUnityEditor = assemblies.Any(a => a.GetName().Name.Equals("UnityEditor", StringComparison.InvariantCultureIgnoreCase));
 
 			if (IsMonoMac)
 			{
@@ -176,7 +176,7 @@ namespace ZeroMQ.lib
 				Name = PlatformName.MacOSX;
 			}
 
-			if (Name == PlatformName.Posix && File.Exists("/System/Library/CoreServices/SystemVersion.plist")) 
+			if (Name == PlatformName.Posix && File.Exists("/System/Library/CoreServices/SystemVersion.plist"))
 			{
 				Name = PlatformName.MacOSX;
 			}
@@ -202,9 +202,9 @@ namespace ZeroMQ.lib
 
 		public static bool IsXamarinAndroid { get; private set; }
 
-        public static bool IsUnity { get; private set; }
+		public static bool IsUnity { get; private set; }
 
-        public static bool IsUnityEditor { get; private set; }
+		public static bool IsUnityEditor { get; private set; }
 
 		public static void ExpandPaths(IList<string> stream,
 			string extension, string path)

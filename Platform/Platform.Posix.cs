@@ -127,14 +127,14 @@
 
 				string traceLabel = string.Format("UnmanagedLibrary[{0}]", libraryName);
 
-                if (Platform.IsUnity && !Platform.IsUnityEditor)
-                {
-                    libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so");
-                    libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so.*");
+				if (Platform.IsUnity && !Platform.IsUnityEditor)
+				{
+					libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so");
+					libraryPaths.Add("{AppBase}/Plugins/{LibraryName}*.so.*");
 
-                    libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so");
-                    libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so.*");
-                }
+					libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so");
+					libraryPaths.Add("{AppBase}/Plugins/{Arch}/{LibraryName}*.so.*");
+				}
 
 				foreach (string libraryPath in libraryPaths)
 				{
@@ -158,17 +158,17 @@
 
 						if (!handle.IsNullOrInvalid())
 						{
-                                if (Platform.IsMono && !Platform.IsUnity)
-                                {
-                                    // This is Platform.Posix. In mono, just dlopen'ing the library doesn't work.
-                                    // Using DllImport("__Internal", EntryPoint = "mono_dllmap_insert") to get mono on the path.
-                                    MonoDllMapInsert(libraryName, file);
-                                }
+							if (Platform.IsMono && !Platform.IsUnity)
+							{
+								// This is Platform.Posix. In mono, just dlopen'ing the library doesn't work.
+								// Using DllImport("__Internal", EntryPoint = "mono_dllmap_insert") to get mono on the path.
+								MonoDllMapInsert(libraryName, file);
+							}
 
-                                Trace.TraceInformation(string.Format("{0} Loaded binary \"{1}\"",
-                                    traceLabel, file));
+							Trace.TraceInformation(string.Format("{0} Loaded binary \"{1}\"",
+								traceLabel, file));
 
-                                return new UnmanagedLibrary(libraryName, handle);
+							return new UnmanagedLibrary(libraryName, handle);
 						}
 
                         handle.Close();
@@ -190,10 +190,10 @@
 
 					if (!handle.IsNullOrInvalid())
 					{
-                        if (Platform.IsMono && !Platform.IsUnity)
-                        {
-                            MonoDllMapInsert(libraryName, tempPath);
-                        }
+						if (Platform.IsMono && !Platform.IsUnity)
+						{
+							MonoDllMapInsert(libraryName, tempPath);
+						}
 
 						Trace.TraceInformation(string.Format("{0} Loaded binary from EmbeddedResource \"{1}\" from \"{2}\".", 
 							traceLabel, resourceName, tempPath));
